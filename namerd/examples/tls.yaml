@@ -14,3 +14,10 @@ interfaces:
     certPath: namerd/examples/certs/namerd-cert.pem
     keyPath: namerd/examples/certs/namerd-key.pem
 - kind: io.l5d.httpController
+  tls:
+    certPath: namerd/examples/certs/namerd-cert.pem
+    keyPath: namerd/examples/certs/namerd-key.pem
+- kind: io.l5d.mesh
+  tls:
+    certPath: namerd/examples/certs/namerd-cert.pem
+    keyPath: namerd/examples/certs/namerd-key.pem

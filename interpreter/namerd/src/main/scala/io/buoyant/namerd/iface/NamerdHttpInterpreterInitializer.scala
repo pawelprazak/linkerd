@@ -3,6 +3,7 @@ package io.buoyant.namerd.iface
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.twitter.conversions.time._
 import com.twitter.finagle._
+import com.twitter.finagle.buoyant.ClientTlsConfig
 import com.twitter.finagle.naming.NameInterpreter
 import com.twitter.finagle.param.HighResTimer
 import com.twitter.finagle.service._

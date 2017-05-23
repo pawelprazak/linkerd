@@ -26,4 +26,23 @@ class ThriftInterpreterInterfaceConfigTest extends FunSuite {
     assert(capacity.addrCacheActive == 6000)
     assert(capacity.addrCacheInactive == ThriftNamerInterface.Capacity.default.addrCacheInactive)
   }
+
+  test("tls") {
+    val yaml = """
+      |kind: io.l5d.thriftNameInterpreter
+      |tls:
+      |  certPath: cert.pem
+      |  keyPath: key.pem
+    """.stripMargin
+
+    val config = Parser
+      .objectMapper(
+        yaml,
+        Iterable(Seq(new ThriftInterpreterInterfaceInitializer))
+      ).readValue[ThriftInterpreterInterfaceConfig](yaml)
+
+    val tls = config.tls.get
+    assert(tls.certPath == "cert.pem")
+    assert(tls.keyPath == "key.pem")
+  }
 }

@@ -54,3 +54,14 @@ case class TlsClientConfig(
 }
 
 case class ClientAuth(certPath: String, keyPath: String)
+
+case class ClientTlsConfig(commonName: String, caCert: Option[String]) {
+  def params: Stack.Params = {
+    TlsClientConfig(
+      disableValidation = Some(false),
+      commonName = Some(commonName),
+      trustCerts = caCert.map(Seq(_)),
+      clientAuth = None
+    ).params
+  }
+}

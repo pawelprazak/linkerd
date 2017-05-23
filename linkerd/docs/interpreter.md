@@ -94,7 +94,7 @@ experimental | _required_ | Because the mesh interpreter is still considered exp
 dst | _required_ | A Finagle path locating the namerd service.
 root | `/default` | A single-element Finagle path representing the namerd namespace.
 retry | see [namerd retry](#namerd-retry) | An object configuring retry backoffs for requests to namerd.
-tls | no tls | The namerd mesh interface does not support server TLS configuration at this time.
+tls | no tls | Requests to namerd will be made using TLS if this parameter is provided.  It must be a [namerd client TLS](#namerd-client-tls) object.
 
 ## File-System
 

@@ -1,6 +1,7 @@
 # Use namerd for name resolution.  Encrypt the connection with TLS.
 routers:
 - protocol: http
+  label: namerd-thrift-tls
   interpreter:
     kind: io.l5d.namerd
     dst: /$/inet/localhost/4100
@@ -10,4 +11,30 @@ routers:
       caCert: namerd/examples/certs/namerd-cacert.pem
   servers:
   - port: 4140
+    ip: 0.0.0.0
+- protocol: http
+  label: namerd-http-tls
+  interpreter:
+    kind: io.l5d.namerd.http
+    experimental: true
+    dst: /$/inet/localhost/4180
+    namespace: default
+    tls:
+      commonName: namerd
+      caCert: namerd/examples/certs/namerd-cacert.pem
+  servers:
+  - port: 4141
+    ip: 0.0.0.0
+- protocol: http
+  label: namerd-grpc-tls
+  interpreter:
+    kind: io.l5d.mesh
+    experimental: true
+    dst: /$/inet/127.1/4321
+    root: /default
+    tls:
+      commonName: namerd
+      caCert: namerd/examples/certs/namerd-cacert.pem
+  servers:
+  - port: 4142
     ip: 0.0.0.0

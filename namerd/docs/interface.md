@@ -66,6 +66,7 @@ Key | Default Value | Description
 --- | ------------- | -----------
 ip | `0.0.0.0` | The local IP address on which to serve the namer interface.
 port | `4321` | The port number on which to server the namer interface.
+tls | no tls | The namer interface will serve over TLS if this parameter is provided. see [TLS](#namerd-server-tls).
 
 ## Http Controller
 
@@ -82,6 +83,7 @@ Key | Default Value | Description
 --- | ------------- | -----------
 ip | loopback | The local IP address on which to serve the namer interface.
 port | `4180` | The port number on which to serve the namer interface.
+tls | no tls | The namer interface will serve over TLS if this parameter is provided. see [TLS](#namerd-server-tls).
 
 ### GET /api/1/dtabs
 

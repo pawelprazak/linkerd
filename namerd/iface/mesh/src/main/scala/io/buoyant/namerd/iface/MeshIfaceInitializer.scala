@@ -3,7 +3,7 @@ package iface
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.twitter.finagle.{Path, Namer, Service, Stack}
-import com.twitter.finagle.buoyant.{H2, h2}
+import com.twitter.finagle.buoyant.H2
 import com.twitter.finagle.naming.NameInterpreter
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.util.Duration
@@ -30,7 +30,14 @@ class MeshIfaceConfig extends InterfaceConfig {
         val resolver = mesh.ResolverService(namers, stats)
         ServerDispatcher(codec, interpreter, delegator, resolver)
       }
-      H2.serve(addr, dispatcher)
+
+      val params = (tls match {
+        case Some(tlsConfig) => tlsConfig.params
+        case None => Stack.Params.empty
+      })
+
+      val h2 = H2.server
+      h2.withParams(h2.params ++ params).serve(addr, dispatcher)
     }
   }
 }
