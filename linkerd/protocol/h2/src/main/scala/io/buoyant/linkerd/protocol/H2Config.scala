@@ -7,15 +7,11 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.{DeserializationContext, JsonDeserializer, JsonNode}
 import com.twitter.conversions.storage._
 import com.twitter.finagle.buoyant.PathMatcher
-import com.twitter.finagle.buoyant.h2.{LinkerdHeaders, Request, Response, ResponseClassifiers}
+import com.twitter.finagle.buoyant.h2._
 import com.twitter.finagle.buoyant.h2.param._
 import com.twitter.finagle.client.StackClient
 import com.twitter.finagle.netty4.ssl.server.Netty4ServerEngineFactory
-import com.twitter.finagle.ssl.ApplicationProtocols
-import com.twitter.finagle.ssl.client.SslClientConfiguration
-import com.twitter.finagle.ssl.server.SslServerEngineFactory
-import com.twitter.finagle.transport.Transport
-import com.twitter.finagle.{Path, Stack, param}
+import com.twitter.finagle.{Stack, param}
 import com.twitter.util.Monitor
 import io.buoyant.config.PolymorphicConfig
 import io.buoyant.router.{ClassifiedRetries, H2, RoutingFactory}
@@ -48,9 +44,9 @@ class H2Initializer extends ProtocolInitializer.Simple {
       .prepend(LinkerdHeaders.Dst.BoundFilter.module)
 
     val clientStack = H2.router.clientStack
+      .replace(TraceInitializer.role, TraceInitializer.clientModule)
       .insertAfter(StackClient.Role.prepConn, LinkerdHeaders.Ctx.clientModule)
 
-    //  .replace(HttpTraceInitializer.role, HttpTraceInitializer.clientModule)
     //  .insertAfter(Retries.Role, http.StatusCodeStatsFilter.module)
 
     H2.router
@@ -61,10 +57,15 @@ class H2Initializer extends ProtocolInitializer.Simple {
 
   private[this] val monitor = Monitor.mk { case NonFatal(_) => true }
 
-  protected val defaultServer = H2.server.withStack(H2.server.stack
-    .prepend(LinkerdHeaders.Ctx.serverModule)
-    .prepend(h2.ErrorReseter.module))
-    .configured(param.Monitor(monitor))
+  protected val defaultServer = {
+    val stk = H2.server.stack
+      .replace(TraceInitializer.role, TraceInitializer.serverModule)
+      .prepend(LinkerdHeaders.Ctx.serverModule)
+      .prepend(h2.ErrorReseter.module)
+
+    H2.server.withStack(stk)
+      .configured(param.Monitor(monitor))
+  }
 
   override def clearServerContext(stk: ServerStack): ServerStack = {
     // Does NOT use the ClearContext module that forcibly clears the
