@@ -1,12 +1,13 @@
 package io.buoyant.linkerd
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.github.ghik.silencer.silent
 import com.twitter.concurrent.AsyncSemaphore
 import com.twitter.conversions.time._
 import com.twitter.finagle.buoyant.TlsServerConfig
 import com.twitter.finagle.filter.RequestSemaphoreFilter
 import com.twitter.finagle.service.TimeoutFilter
-import com.twitter.finagle.ssl.client.SslClientEngineFactory
+import com.twitter.finagle.ssl.server.{LegacyKeyServerEngineFactory, SslServerEngineFactory}
 import com.twitter.finagle.{ListeningServer, Path, Stack}
 import io.buoyant.config.types.Port
 import java.net.{InetAddress, InetSocketAddress}
@@ -96,10 +97,20 @@ class ServerConfig { config =>
 
   @JsonIgnore
   protected def serverParams: Stack.Params = Stack.Params.empty
-    .maybeWith(tls.map(_.params))
+    .maybeWith(tls.map(_.params(alpnProtocols, sslServerEngine)))
     .maybeWith(clearContext.map(ClearContext.Enabled(_)))
     .maybeWith(timeoutMs.map(timeout => TimeoutFilter.Param(timeout.millis))) +
     RequestSemaphoreFilter.Param(requestSemaphore)
+
+  @JsonIgnore
+  def alpnProtocols: Option[Seq[String]] = None
+
+  // The deprecated LegacyKeyServerEngineFactory allows us to accept PKCS#1 formatted keys.
+  // We should remove this and replace it with Netty4ServerEngineFactory once we no longer allow
+  // PKCS#1 keys.
+  @JsonIgnore
+  @silent
+  val sslServerEngine: SslServerEngineFactory = LegacyKeyServerEngineFactory
 
   @JsonIgnore
   def mk(pi: ProtocolInitializer, routerLabel: String) = Server.Impl(

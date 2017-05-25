@@ -187,14 +187,12 @@ class H2ServerConfig extends ServerConfig with H2EndpointConfig {
 
   var maxConcurrentStreamsPerConnection: Option[Int] = None
 
-  // TODO: this should override values in Server.scala / TLSServerConfig.scala
   @JsonIgnore
-  val alpnProtocols: Option[Seq[String]] =
+  override val alpnProtocols: Option[Seq[String]] =
     Some(Seq(ApplicationProtocolNames.HTTP_2))
 
-  // TODO: this should override values in Server.scala / TLSServerConfig.scala
   @JsonIgnore
-  val sslServerEngine = Netty4ServerEngineFactory()
+  override val sslServerEngine = Netty4ServerEngineFactory()
 
   override def withEndpointParams(params: Stack.Params): Stack.Params = super.withEndpointParams(params)
     .maybeWith(maxConcurrentStreamsPerConnection.map(c => Settings.MaxConcurrentStreams(Some(c.toLong))))

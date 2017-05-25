@@ -1,9 +1,8 @@
 package com.twitter.finagle.buoyant
 
-import com.github.ghik.silencer.silent
 import com.twitter.finagle.Stack
 import com.twitter.finagle.ssl.{ClientAuth => FClientAuth, _}
-import com.twitter.finagle.ssl.server.{LegacyKeyServerEngineFactory, SslServerConfiguration, SslServerEngineFactory}
+import com.twitter.finagle.ssl.server.{SslServerConfiguration, SslServerEngineFactory}
 import com.twitter.finagle.transport.Transport
 import java.io.File
 
@@ -14,7 +13,10 @@ case class TlsServerConfig(
   ciphers: Option[Seq[String]] = None,
   requireClientAuth: Option[Boolean] = None
 ) {
-  def params: Stack.Params = {
+  def params(
+    alpnProtocols: Option[Seq[String]],
+    sslServerEngine: SslServerEngineFactory
+  ): Stack.Params = {
     val trust = caCertPath match {
       case Some(caCertPath) => TrustCredentials.CertCollection(new File(caCertPath))
       case None => TrustCredentials.Unspecified
@@ -42,12 +44,4 @@ case class TlsServerConfig(
       applicationProtocols = appProtocols
     ))) + SslServerEngineFactory.Param(sslServerEngine)
   }
-
-  private[this] def alpnProtocols: Option[Seq[String]] = None
-
-  // The deprecated LegacyKeyServerEngineFactory allows us to accept PKCS#1 formatted keys.
-  // We should remove this and replace it with Netty4ServerEngineFactory once we no longer allow
-  // PKCS#1 keys.
-  @silent
-  private[this] val sslServerEngine: SslServerEngineFactory = LegacyKeyServerEngineFactory
 }

@@ -1,12 +1,14 @@
 package io.buoyant.namerd
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.github.ghik.silencer.silent
 import com.twitter.finagle.Stack
 import com.twitter.finagle.stats.StatsReceiver
 import com.twitter.finagle.{Namer, Path}
 import io.buoyant.config.types.Port
 import io.buoyant.config.{PolymorphicConfig, ConfigInitializer}
 import com.twitter.finagle.buoyant.TlsServerConfig
+import com.twitter.finagle.ssl.server.LegacyKeyServerEngineFactory
 import java.net.{InetAddress, InetSocketAddress}
 
 /**
@@ -24,7 +26,8 @@ abstract class InterfaceConfig extends PolymorphicConfig {
   )
 
   @JsonIgnore
-  def tlsParams = tls.map(_.params).getOrElse(Stack.Params.empty)
+  @silent
+  def tlsParams = tls.map(_.params(None, LegacyKeyServerEngineFactory)).getOrElse(Stack.Params.empty)
 
   @JsonIgnore
   protected def defaultAddr: InetSocketAddress
