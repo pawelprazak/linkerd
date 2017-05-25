@@ -41,10 +41,7 @@ case class ThriftInterpreterInterfaceConfig(
       cache.map(_.capacity).getOrElse(ThriftNamerInterface.Capacity.default),
       stats
     )
-    val params = (tls match {
-      case Some(tlsConfig) => tlsConfig.params
-      case None => Stack.Params.empty
-    }) + param.Stats(stats) + param.Label(ThriftInterpreterInterfaceConfig.kind)
+    val params = tlsParams + param.Stats(stats) + param.Label(ThriftInterpreterInterfaceConfig.kind)
     ThriftServable(addr, iface, params)
   }
 }

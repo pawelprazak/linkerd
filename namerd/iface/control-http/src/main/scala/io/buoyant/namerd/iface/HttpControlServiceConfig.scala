@@ -16,10 +16,7 @@ class HttpControlServiceConfig extends InterpreterInterfaceConfig {
     stats: StatsReceiver
   ): Servable = {
     val iface = new HttpControlService(store, delegate, namers)
-    val params = (tls match {
-      case Some(tlsConfig) => tlsConfig.params
-      case None => Stack.Params.empty
-    }) + param.Stats(stats) + param.Label(HttpControlServiceConfig.kind)
+    val params = tlsParams + param.Stats(stats) + param.Label(HttpControlServiceConfig.kind)
 
     HttpControlServable(addr, iface, params)
   }

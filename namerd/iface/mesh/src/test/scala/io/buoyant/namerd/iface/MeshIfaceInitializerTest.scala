@@ -29,6 +29,11 @@ class MeshInterpreterInitializerTest extends FunSuite {
       |tls:
       |  certPath: cert.pem
       |  keyPath: key.pem
+      |  caCertPath: cacert.pem
+      |  ciphers:
+      |  - "foo"
+      |  - "bar"
+      |  requireClientAuth: true
     """.stripMargin
 
     val config = Parser
@@ -40,5 +45,8 @@ class MeshInterpreterInitializerTest extends FunSuite {
     val tls = config.tls.get
     assert(tls.certPath == "cert.pem")
     assert(tls.keyPath == "key.pem")
+    assert(tls.caCertPath == Some("cacert.pem"))
+    assert(tls.ciphers == Some(List("foo", "bar")))
+    assert(tls.requireClientAuth == Some(true))
   }
 }

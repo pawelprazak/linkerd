@@ -3,7 +3,7 @@ package io.buoyant.interpreter
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.twitter.conversions.time._
 import com.twitter.finagle._
-import com.twitter.finagle.buoyant.{ClientTlsConfig, H2}
+import com.twitter.finagle.buoyant.{TlsClientConfig, H2}
 import com.twitter.finagle.naming.NameInterpreter
 import com.twitter.finagle.service.Backoff
 import com.twitter.finagle.ssl.ApplicationProtocols
@@ -43,7 +43,7 @@ case class Retry(
 case class MeshInterpreterConfig(
   dst: Option[Path],
   root: Option[Path],
-  tls: Option[ClientTlsConfig],
+  tls: Option[TlsClientConfig],
   retry: Option[Retry]
 ) extends InterpreterConfig {
   import MeshInterpreterConfig._

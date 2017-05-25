@@ -31,13 +31,13 @@ class MeshIfaceConfig extends InterfaceConfig {
         ServerDispatcher(codec, interpreter, delegator, resolver)
       }
 
-      val params = (tls match {
-        case Some(tlsConfig) => tlsConfig.params
-        case None => Stack.Params.empty
-      })
+      // val params = (tls match {
+      //   case Some(tlsConfig) => tlsConfig.params
+      //   case None => Stack.Params.empty
+      // })
 
       val h2 = H2.server
-      h2.withParams(h2.params ++ params).serve(addr, dispatcher)
+      h2.withParams(h2.params ++ tlsParams).serve(addr, dispatcher)
     }
   }
 }

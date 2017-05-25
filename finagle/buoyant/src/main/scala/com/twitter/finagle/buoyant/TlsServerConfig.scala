@@ -1,0 +1,53 @@
+package com.twitter.finagle.buoyant
+
+import com.github.ghik.silencer.silent
+import com.twitter.finagle.Stack
+import com.twitter.finagle.ssl.{ClientAuth => FClientAuth, _}
+import com.twitter.finagle.ssl.server.{LegacyKeyServerEngineFactory, SslServerConfiguration, SslServerEngineFactory}
+import com.twitter.finagle.transport.Transport
+import java.io.File
+
+case class TlsServerConfig(
+  certPath: String,
+  keyPath: String,
+  caCertPath: Option[String] = None,
+  ciphers: Option[Seq[String]] = None,
+  requireClientAuth: Option[Boolean] = None
+) {
+  def params: Stack.Params = {
+    val trust = caCertPath match {
+      case Some(caCertPath) => TrustCredentials.CertCollection(new File(caCertPath))
+      case None => TrustCredentials.Unspecified
+    }
+    val cipherSuites = ciphers match {
+      case Some(cs) => CipherSuites.Enabled(cs)
+      case None => CipherSuites.Unspecified
+    }
+    val appProtocols = alpnProtocols match {
+      case Some(ps) => ApplicationProtocols.Supported(ps)
+      case None => ApplicationProtocols.Unspecified
+    }
+    val clientAuth = requireClientAuth match {
+      case Some(true) => FClientAuth.Needed
+      case _ => FClientAuth.Off
+    }
+    // The deprecated LegacyKeyServerEngineFactory allows us to accept PKCS#1 formatted keys.
+    // We should remove this and replace it with Netty4ServerEngineFactory once we no longer allow
+    // PKCS#1 keys.
+    Stack.Params.empty + Transport.ServerSsl(Some(SslServerConfiguration(
+      clientAuth = clientAuth,
+      keyCredentials = KeyCredentials.CertAndKey(new File(certPath), new File(keyPath)),
+      trustCredentials = trust,
+      cipherSuites = cipherSuites,
+      applicationProtocols = appProtocols
+    ))) + SslServerEngineFactory.Param(sslServerEngine)
+  }
+
+  private[this] def alpnProtocols: Option[Seq[String]] = None
+
+  // The deprecated LegacyKeyServerEngineFactory allows us to accept PKCS#1 formatted keys.
+  // We should remove this and replace it with Netty4ServerEngineFactory once we no longer allow
+  // PKCS#1 keys.
+  @silent
+  private[this] val sslServerEngine: SslServerEngineFactory = LegacyKeyServerEngineFactory
+}

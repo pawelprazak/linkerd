@@ -23,8 +23,13 @@ class MeshInterpreterInitializerTest extends FunSuite {
                    |dst: /$$/inet/127.1/4321
                    |root: /default
                    |tls:
-                   |  commonName: namerd
-                   |  caCert: namerd/examples/certs/namerd-cacert.pem
+                   |  disableValidation: false
+                   |  commonName: "{service}"
+                   |  trustCerts:
+                   |  - /foo/caCert.pem
+                   |  clientAuth:
+                   |    certPath: /namerd-cert.pem
+                   |    keyPath: /namerd-key.pem
                    |""".stripMargin
 
     val mapper = Parser.objectMapper(yaml, Iterable(Seq(MeshInterpreterInitializer)))
@@ -35,8 +40,11 @@ class MeshInterpreterInitializerTest extends FunSuite {
     assert(!namerd.disabled)
 
     val tls = namerd.tls.get
-    assert(tls.commonName == "namerd")
-    assert(tls.caCert == Some("namerd/examples/certs/namerd-cacert.pem"))
+    assert(tls.disableValidation == Some(false))
+    assert(tls.commonName == Some("{service}"))
+    assert(tls.trustCerts == Some(List("/foo/caCert.pem")))
+    assert(tls.clientAuth.get.certPath == "/namerd-cert.pem")
+    assert(tls.clientAuth.get.keyPath == "/namerd-key.pem")
   }
 
   test("without experimental") {
@@ -44,8 +52,13 @@ class MeshInterpreterInitializerTest extends FunSuite {
                    |dst: /$$/inet/127.1/4321
                    |root: /default
                    |tls:
-                   |  commonName: namerd
-                   |  caCert: namerd/examples/certs/namerd-cacert.pem
+                   |  disableValidation: false
+                   |  commonName: "{service}"
+                   |  trustCerts:
+                   |  - /foo/caCert.pem
+                   |  clientAuth:
+                   |    certPath: /namerd-cert.pem
+                   |    keyPath: /namerd-key.pem
                    |""".stripMargin
 
     val mapper = Parser.objectMapper(yaml, Iterable(Seq(MeshInterpreterInitializer)))
